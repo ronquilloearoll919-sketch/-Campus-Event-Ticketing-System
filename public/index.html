@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Event Ticketing System</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- html5-qrcode library for scanning -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        :root {
+            --primary: #1a3b5d;
+            --primary-light: #2c5282;
+            --primary-dark: #0f2440;
+            --accent: #eab308;
+            --accent-hover: #ca8a04;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow: 0 4px 16px rgba(0,0,0,0.06);
+            --shadow-lg: 0 12px 32px rgba(0,0,0,0.08);
+            --radius: 14px;
+            --transition: 0.2s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding-top: 70px;
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ----- NAVBAR ----- */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            padding: 0.5rem 1rem;
+            transition: var(--transition);
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: -0.02em;
+            color: #fff !important;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .navbar-brand i {
+            font-size: 1.8rem;
+            color: var(--accent);
+        }
+        .navbar-nav .nav-link {
+            color: rgba(255,255,255,0.85) !important;
+            font-weight: 500;
+            margin: 0 4px;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link.active {
+            color: #fff !important;
+            background: rgba(255,255,255,0.15);
+        }
+        .navbar-toggler {
+            border: none;
+            color: #fff;
+        }
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.5);
+        }
+
+        /* ----- HERO / LANDING ----- */
+        .hero-section {
+            background: linear-gradient(135deg, #0f2440 0%, #1a3b5d 60%, #2c5282 100%);
+            color: #fff;
+            padding: 6rem 0 5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            bottom: -60px;
+            left: -50px;
+            width: 280px;
+            height: 280px;
+            background: rgba(234, 179, 8, 0.07);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .hero-section h1 {
+            font-weight: 900;
+            font-size: 3.2rem;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+        }
+        .hero-section .lead {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+        .hero-badge {
+            background: var(--accent);
+            color: #0f2440;
+            font-weight: 700;
+            padding: 0.3rem 1rem;
+            border-radius: 30px;
+            display: inline-block;
+            font-size: 0.9rem;
+            letter-spacing: 0.02em;
+            margin-bottom: 1rem;
+        }
+
+        /* ----- SECTION COMMON ----- */
+        .section-title {
+            font-weight: 800;
+            font-size: 2.2rem;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.75rem;
+            color: var(--primary);
+        }
+        .section-subtitle {
+            color: var(--text-secondary);
+            font-weight: 500;
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+        }
+
+        .card-custom {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        .card-custom:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* ----- STATS DASHBOARD ----- */
+        .stat-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: var(--transition);
+        }
+        .stat-card:hover {
+            box-shadow: var(--shadow);
+            border-color: var(--primary-light);
+        }
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: rgba(26, 59, 93, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            color: var(--primary);
+        }
+        .stat-info h3 {
+            font-weight: 800;
+            font-size: 2rem;
+            margin: 0;
+            color: var(--primary);
+            line-height: 1;
+        }
+        .stat-info p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        /* ----- TICKET TABLE ----- */
+        .table-custom {
+            background: #fff;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+        .table-custom thead th {
+            background: var(--primary);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            border: none;
+            padding: 1rem;
+        }
+        .table-custom tbody td {
+            padding: 0.9rem 1rem;
+            vertical-align: middle;
+            font-weight: 500;
+            border-color: var(--border);
+        }
+        .badge-status {
+            font-size: 0.75rem;
+            padding: 0.35em 0.8em;
+            border-radius: 30px;
+            font-weight: 600;
+        }
+
+        /* ----- FORMS ----- */
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid var(--border);
+            padding: 0.7rem 1rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 4px rgba(26, 59, 93, 0.1);
+        }
+        .btn-primary-custom {
+            background: var(--primary);
+            border: none;
+            border-radius: 30px;
+            padding: 0.7rem 2rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            transition: var(--transition);
+            box-shadow: 0 4px 14px rgba(26, 59, 93, 0.3);
+            color: #fff;
+        }
+        .btn-primary-custom:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(26, 59, 93, 0.4);
+        }
+        .btn-accent {
+            background: var(--accent);
+            color: #0f2440;
+            border: none;
+            border-radius: 30px;
+            padding: 0.7rem 2rem;
+            font-weight: 700;
+            transition: var(--transition);
+        }
+        .btn-accent:hover {
+            background: #facc15;
+            transform: translateY(-2px);
+        }
+
+        /* ----- ABOUT / CONTACT CARDS ----- */
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(234, 179, 8, 0.12);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        /* ----- MODAL STYLING ----- */
+        .modal-content {
+            border-radius: var(--radius);
+            border: none;
+            box-shadow: var(--shadow-lg);
+        }
+        .modal-header {
+            background: var(--primary);
+            color: #fff;
+            border-radius: var(--radius) var(--radius) 0 0;
+            border: none;
+            padding: 1.2rem 1.5rem;
+        }
+        .modal-title {
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+        .btn-close-white {
+            filter: brightness(0) invert(1);
+        }
+
+        /* ----- FOOTER ----- */
+        .footer {
+            background: var(--primary-dark);
+            color: rgba(255,255,255,0.8);
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+
+        /* QR scanner container */
+        #reader {
+            width: 100%;
+            max-width: 350px;
+            margin: 0 auto;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .hero-section h1 {
+                font-size: 2.2rem;
+            }
+            .stat-card {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        section {
+            scroll-margin-top: 80px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== NAVIGATION ==================== -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#home">
+                <i class="fas fa-ticket-alt"></i> <span>CampusTix</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 30%22><path stroke=%22white%22 stroke-width=%222%22 d=%22M4 7h22M4 15h22M4 23h22%22/></svg>')"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+                    <li class="nav-item"><a class="nav-link active" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#create-event">Create Event</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#tickets">Tickets</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                    <li class="nav-item">
+                        <button class="btn btn-accent ms-2 mt-2 mt-lg-0" id="loginBtn" data-bs-toggle="modal" data-bs-target="#loginModal">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                        <button class="btn btn-accent ms-2 mt-2 mt-lg-0" id="logoutBtn" style="display:none;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                        <span id="loggedUser" class="text-white ms-2 fw-semibold small"></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ==================== HERO / LANDING PAGE ==================== -->
+    <section id="home" class="hero-section">
+        <div class="container text-center text-md-start">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <span class="hero-badge"><i class="fas fa-graduation-cap"></i> School Events Made Easy</span>
+                    <h1 class="display-4 fw-bold">Digital Ticketing for<br>Campus Events</h1>
+                    <p class="lead mt-3">No more paper stubs or long lines. Sell, validate, and track tickets with QR codes — all in one system.</p>
+                    <div class="mt-4">
+                        <a href="#create-event" class="btn btn-accent btn-lg me-3"><i class="fas fa-plus-circle"></i> Create Event</a>
+                        <a href="#tickets" class="btn btn-outline-light btn-lg"><i class="fas fa-qrcode"></i> View Tickets</a>
+                    </div>
+                </div>
+                <div class="col-lg-6 mt-5 mt-lg-0 text-center">
+                    <img src="https://placehold.co/500x350/1a3b5d/white?text=🎟️+Event+Ticket+QR" alt="Ticketing illustration" class="img-fluid rounded-4 shadow-lg" style="max-width: 450px;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== DASHBOARD SECTION ==================== -->
+    <section id="dashboard" class="py-5">
+        <div class="container">
+            <h2 class="section-title text-center">📊 Live Dashboard</h2>
+            <p class="section-subtitle text-center">Real‑time sales and event performance at a glance.</p>
+            <div class="row g-4 mb-5">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        <div class="stat-info">
+                            <p>Total Tickets Sold</p>
+                            <h3 id="statTickets">—</h3>
+                            <small class="text-muted">loading...</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+                        <div class="stat-info">
+                            <p>Active Events</p>
+                            <h3 id="statEvents">—</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-peso-sign"></i></div>
+                        <div class="stat-info">
+                            <p>Total Revenue</p>
+                            <h3 id="statRevenue">₱0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Recent sales table -->
+            <div class="table-custom table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Ticket ID</th>
+                            <th>Student</th>
+                            <th>Event</th>
+                            <th>Status</th>
+                            <th>QR</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ticketTableBody">
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">Login to view tickets</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== CREATE EVENT (ORGANIZER) ==================== -->
+    <section id="create-event" class="py-5 bg-white">
+        <div class="container">
+            <h2 class="section-title text-center">📝 Create New Event</h2>
+            <p class="section-subtitle text-center">Set up an event, price, and available slots.</p>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <!-- Role‑dependent card -->
+                    <div id="eventFormCard" class="card-custom p-4 p-md-5 role-dependent" style="display:none;">
+                        <form id="eventForm" class="needs-validation" novalidate>
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label for="eventName" class="form-label fw-semibold">Event Name</label>
+                                    <input type="text" class="form-control" id="eventName" placeholder="e.g., CCS Night 2026" required>
+                                    <div class="invalid-feedback">Please enter an event name.</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="eventDate" class="form-label fw-semibold">Date</label>
+                                    <input type="date" class="form-control" id="eventDate" required>
+                                    <div class="invalid-feedback">Select a date.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="venue" class="form-label fw-semibold">Venue</label>
+                                    <input type="text" class="form-control" id="venue" placeholder="Auditorium" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="price" class="form-label fw-semibold">Price (₱)</label>
+                                    <input type="number" class="form-control" id="price" placeholder="50" min="0" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="slots" class="form-label fw-semibold">Total Slots</label>
+                                    <input type="number" class="form-control" id="slots" placeholder="500" min="1" required>
+                                </div>
+                                <div class="col-12">
+                                    <label for="description" class="form-label fw-semibold">Description</label>
+                                    <textarea class="form-control" id="description" rows="3" placeholder="Event details..."></textarea>
+                                </div>
+                                <div class="col-12 text-end">
+                                    <button type="submit" class="btn btn-primary-custom"><i class="fas fa-save"></i> Create Event</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="purchaseCard" class="card-custom p-4 p-md-5 role-dependent" style="display:none;">
+                        <h5 class="fw-bold mb-3">🎟️ Buy Tickets</h5>
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-5">
+                                <label for="eventSelect" class="form-label fw-semibold">Select Event</label>
+                                <select id="eventSelect" class="form-select">
+                                    <option value="">-- Choose an event --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="quantity" class="form-label fw-semibold">Quantity</label>
+                                <input type="number" id="quantity" class="form-control" value="1" min="1" max="5">
+                            </div>
+                            <div class="col-md-4">
+                                <button id="purchaseBtn" class="btn btn-accent w-100"><i class="fas fa-shopping-cart"></i> Purchase</button>
+                            </div>
+                        </div>
+                        <div id="qrCodeContainer" class="mt-4 text-center"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== TICKETS SECTION (already shown in dashboard) ==================== -->
+    <section id="tickets" class="py-5">
+        <div class="container">
+            <h2 class="section-title text-center">🎟️ Ticket Records</h2>
+            <p class="section-subtitle text-center">View all issued tickets, scan QR, and manage entries.</p>
+            <div class="d-flex justify-content-end mb-3">
+                <button class="btn btn-primary-custom" id="startScanBtn" data-bs-toggle="modal" data-bs-target="#scanModal"><i class="fas fa-qrcode"></i> Scan Ticket</button>
+            </div>
+            <!-- Same table as dashboard, already present -->
+            <div class="table-custom table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr><th>Ticket ID</th><th>Student</th><th>Event</th><th>Status</th><th>QR</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody id="ticketTableBody2">
+                        <!-- Dynamically filled -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== ABOUT SECTION ==================== -->
+    <section id="about" class="py-5 bg-white">
+        <div class="container">
+            <h2 class="section-title text-center">ℹ️ About the System</h2>
+            <p class="section-subtitle text-center">Why schools love CampusTix.</p>
+            <div class="row g-4 mt-3">
+                <div class="col-md-4">
+                    <div class="card-custom p-4 text-center h-100">
+                        <div class="feature-icon mx-auto"><i class="fas fa-shield-alt"></i></div>
+                        <h5 class="fw-bold">No Duplicate Tickets</h5>
+                        <p class="text-secondary">Each QR is scanned once and marked as used, preventing fraud.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card-custom p-4 text-center h-100">
+                        <div class="feature-icon mx-auto"><i class="fas fa-bolt"></i></div>
+                        <h5 class="fw-bold">Fast Entry</h5>
+                        <p class="text-secondary">Gate staff scan QR codes in seconds — no more paper lists.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card-custom p-4 text-center h-100">
+                        <div class="feature-icon mx-auto"><i class="fas fa-chart-pie"></i></div>
+                        <h5 class="fw-bold">Full Audit Trail</h5>
+                        <p class="text-secondary">All sales and validations are logged for transparent reporting.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== CONTACT SECTION ==================== -->
+    <section id="contact" class="py-5">
+        <div class="container">
+            <h2 class="section-title text-center">📬 Contact Us</h2>
+            <p class="section-subtitle text-center">Questions? Reach the OSA or event committee.</p>
+            <div class="row justify-content-center">
+                <div class="col-lg-6">
+                    <div class="card-custom p-4">
+                        <form>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Your Name</label>
+                                <input type="text" class="form-control" placeholder="Juan dela Cruz" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Email</label>
+                                <input type="email" class="form-control" placeholder="student@school.edu" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Message</label>
+                                <textarea class="form-control" rows="4" placeholder="How can we help?" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary-custom w-100">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-4 mt-4 mt-lg-0">
+                    <div class="card-custom p-4 h-100">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-map-marker-alt me-2"></i> Office</h5>
+                        <p class="text-secondary">Student Services Center, 2F Main Building</p>
+                        <h5 class="fw-bold mb-3 mt-4"><i class="fas fa-envelope me-2"></i> Email</h5>
+                        <p class="text-secondary">osa@campus.edu.ph</p>
+                        <h5 class="fw-bold mb-3 mt-4"><i class="fas fa-phone me-2"></i> Phone</h5>
+                        <p class="text-secondary">(02) 8123-4567</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="footer text-center">
+        <div class="container">
+            <span>&copy; 2026 CampusTix — Office of Student Affairs</span>
+        </div>
+    </footer>
+
+    <!-- ==================== LOGIN MODAL ==================== -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel"><i class="fas fa-sign-in-alt me-2"></i>Login to CampusTix</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">School ID</label>
+                            <input type="text" class="form-control" id="loginSchoolId" placeholder="2024-001" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" placeholder="••••••••" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary-custom">Sign In</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== QR SCAN MODAL (Gate Validation) ==================== -->
+    <div class="modal fade" id="scanModal" tabindex="-1" aria-labelledby="scanModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="scanModalLabel"><i class="fas fa-qrcode me-2"></i>Ticket Validation</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <div id="reader"></div>
+                    <p class="mt-3 fw-semibold" id="scanResult"></p>
+                    <hr>
+                    <p class="small text-muted">Or enter ticket code manually:</p>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="manualTicketCode" placeholder="TKT-XXXX">
+                        <button class="btn btn-primary-custom" id="manualValidateBtn">Validate</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ====================== GLOBAL STATE ======================
+        let authToken = null;
+        let currentUser = null;
+
+        // ====================== API HELPERS ======================
+        const API_BASE = '';
+
+        async function apiFetch(url, options = {}) {
+            const headers = {
+                'Content-Type': 'application/json',
+                ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+            };
+            const res = await fetch(url, { ...options, headers: { ...headers, ...options.headers } });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ error: res.statusText }));
+                throw new Error(err.error || 'Request failed');
+            }
+            return res.json();
+        }
+
+        // ====================== LOGIN ======================
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const schoolId = document.getElementById('loginSchoolId').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            try {
+                const data = await apiFetch('/api/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ school_id: schoolId, password: password })
+                });
+                authToken = data.token;
+                currentUser = data.user;
+                // Hide login modal
+                const loginModalEl = document.getElementById('loginModal');
+                const loginModal = bootstrap.Modal.getInstance(loginModalEl);
+                loginModal.hide();
+                // Update navbar
+                document.getElementById('loginBtn').style.display = 'none';
+                document.getElementById('logoutBtn').style.display = 'inline-block';
+                document.getElementById('loggedUser').innerText = `${currentUser.full_name} (${currentUser.role})`;
+                applyRoleUI();
+                loadDashboard();
+                loadTickets();
+                loadEvents();
+            } catch (err) {
+                alert('Login failed: ' + err.message);
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            authToken = null;
+            currentUser = null;
+            document.getElementById('loginBtn').style.display = 'inline-block';
+            document.getElementById('logoutBtn').style.display = 'none';
+            document.getElementById('loggedUser').innerText = '';
+            // Hide role-dependent sections
+            document.querySelectorAll('.role-dependent').forEach(el => el.style.display = 'none');
+            document.getElementById('statTickets').innerText = '—';
+            document.getElementById('statEvents').innerText = '—';
+            document.getElementById('statRevenue').innerText = '₱0';
+            document.getElementById('ticketTableBody').innerHTML = '<tr><td colspan="6" class="text-center text-muted">Login to view tickets</td></tr>';
+            document.getElementById('ticketTableBody2').innerHTML = '';
+            document.getElementById('qrCodeContainer').innerHTML = '';
+            if (window.html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().catch(() => {});
+            }
+        });
+
+        function applyRoleUI() {
+            if (!currentUser) return;
+            const role = currentUser.role;
+            // Hide all first
+            document.querySelectorAll('.role-dependent').forEach(el => el.style.display = 'none');
+            if (role === 'organizer') {
+                document.getElementById('eventFormCard').style.display = 'block';
+            } else if (role === 'student') {
+                document.getElementById('purchaseCard').style.display = 'block';
+                loadEvents(); // refresh dropdown
+            } else if (role === 'gate_staff') {
+                // gate panel will be in scan modal, but we can also show a button
+                document.getElementById('startScanBtn').style.display = 'inline-block';
+            }
+        }
+
+        // ====================== DASHBOARD ======================
+        async function loadDashboard() {
+            if (!authToken) return;
+            try {
+                const stats = await apiFetch('/api/stats');
+                document.getElementById('statTickets').innerText = `${stats.totalTickets} / ${stats.totalSlots}`;
+                document.getElementById('statEvents').innerText = stats.activeEvents;
+                document.getElementById('statRevenue').innerText = '₱' + (stats.revenue || 0);
+            } catch (err) {
+                console.log('Stats load error:', err);
+            }
+        }
+
+        // ====================== EVENTS (for purchase dropdown & organizer) ======================
+        async function loadEvents() {
+            if (!authToken) return;
+            try {
+                const events = await apiFetch('/api/events');
+                const select = document.getElementById('eventSelect');
+                if (select) {
+                    select.innerHTML = '<option value="">-- Choose an event --</option>';
+                    events.forEach(ev => {
+                        select.innerHTML += `<option value="${ev.id}">${ev.name} - ₱${ev.price} (${ev.date})</option>`;
+                    });
+                }
+            } catch (err) {
+                console.log('Events load error:', err);
+            }
+        }
+
+        // ====================== CREATE EVENT ======================
+        document.getElementById('eventForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser || currentUser.role !== 'organizer') return;
+            const name = document.getElementById('eventName').value.trim();
+            const date = document.getElementById('eventDate').value;
+            const venue = document.getElementById('venue').value.trim();
+            const price = parseFloat(document.getElementById('price').value);
+            const slots = parseInt(document.getElementById('slots').value);
+            const desc = document.getElementById('description').value.trim();
+            try {
+                await apiFetch('/api/events', {
+                    method: 'POST',
+                    body: JSON.stringify({ name, date, venue, price, total_slots: slots, description: desc })
+                });
+                alert('Event created successfully!');
+                e.target.reset();
+                loadEvents();
+                loadDashboard();
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        });
+
+        // ====================== TICKET PURCHASE ======================
+        document.getElementById('purchaseBtn').addEventListener('click', async () => {
+            if (!currentUser || currentUser.role !== 'student') return;
+            const eventId = document.getElementById('eventSelect').value;
+            const qty = parseInt(document.getElementById('quantity').value) || 1;
+            if (!eventId) return alert('Select an event.');
+            try {
+                const result = await apiFetch('/api/tickets', {
+                    method: 'POST',
+                    body: JSON.stringify({ event_id: eventId, quantity: qty })
+                });
+                alert(`Ticket(s) purchased! Codes: ${result.tickets.join(', ')}`);
+                const firstCode = result.tickets[0];
+                document.getElementById('qrCodeContainer').innerHTML = `
+                    <p class="fw-bold">Your QR Code (${firstCode})</p>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${firstCode}" alt="QR">
+                `;
+                loadDashboard();
+                loadTickets();
+            } catch (err) {
+                alert('Purchase failed: ' + err.message);
+            }
+        });
+
+        // ====================== TICKET LIST (both tables) ======================
+        async function loadTickets() {
+            if (!authToken) return;
+            try {
+                const tickets = await apiFetch('/api/tickets');
+                const rows = tickets.map(t => {
+                    const statusClass = t.status === 'valid' ? 'bg-success' : (t.status === 'used' ? 'bg-danger' : 'bg-warning');
+                    let actionBtn = '';
+                    if (currentUser.role === 'gate_staff' && t.status === 'valid') {
+                        actionBtn = `<button class="btn btn-sm btn-outline-primary validate-manual" data-code="${t.ticket_code}">Validate</button>`;
+                    } else if (t.status === 'used') {
+                        actionBtn = '<button class="btn btn-sm btn-outline-danger" disabled>Used</button>';
+                    }
+                    return `
+                        <tr>
+                            <td><strong>${t.ticket_code}</strong></td>
+                            <td>${t.student_name || currentUser.full_name}</td>
+                            <td>${t.event_name}</td>
+                            <td><span class="badge ${statusClass}">${t.status}</span></td>
+                            <td><i class="fas fa-qrcode"></i></td>
+                            <td>${actionBtn}</td>
+                        </tr>
+                    `;
+                }).join('');
+                document.getElementById('ticketTableBody').innerHTML = rows || '<tr><td colspan="6" class="text-center text-muted">No tickets found</td></tr>';
+                document.getElementById('ticketTableBody2').innerHTML = rows || '<tr><td colspan="6" class="text-center text-muted">No tickets found</td></tr>';
+
+                // Attach manual validate handlers
+                document.querySelectorAll('.validate-manual').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const code = btn.dataset.code;
+                        try {
+                            const res = await apiFetch('/api/validate', { method: 'POST', body: JSON.stringify({ ticket_code: code }) });
+                            alert(`Validated: ${res.student_name} for ${res.event}`);
+                            loadTickets();
+                            loadDashboard();
+                        } catch (err) {
+                            alert(err.message);
+                        }
+                    });
+                });
+            } catch (err) {
+                console.log('Ticket load error:', err);
+            }
+        }
+
+        // ====================== QR SCANNER (gate staff) ======================
+        let html5QrCode = null;
+
+        function startScanner() {
+            if (!document.getElementById('reader')) return;
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 250 },
+                async (decodedText) => {
+                    document.getElementById('scanResult').innerText = `Scanned: ${decodedText}`;
+                    try {
+                        const res = await apiFetch('/api/validate', { method: 'POST', body: JSON.stringify({ ticket_code: decodedText }) });
+                        alert(`✅ Validated: ${res.student_name}`);
+                        loadTickets();
+                        loadDashboard();
+                    } catch (err) {
+                        alert('❌ ' + err.message);
+                    } finally {
+                        html5QrCode.stop().catch(()=>{});
+                    }
+                },
+                (errorMessage) => { /* ignore */ }
+            ).catch(err => console.log('Camera start error:', err));
+        }
+
+        document.getElementById('startScanBtn')?.addEventListener('click', () => {
+            startScanner();
+        });
+
+        // Manual validate button inside scan modal
+        document.getElementById('manualValidateBtn')?.addEventListener('click', async () => {
+            const code = document.getElementById('manualTicketCode').value.trim();
+            if (!code) return alert('Enter a ticket code');
+            try {
+                const res = await apiFetch('/api/validate', { method: 'POST', body: JSON.stringify({ ticket_code: code }) });
+                alert(`✅ Validated: ${res.student_name}`);
+                loadTickets();
+                loadDashboard();
+            } catch (err) {
+                alert('❌ ' + err.message);
+            }
+        });
+
+        // Stop scanner when modal is hidden
+        document.getElementById('scanModal').addEventListener('hidden.bs.modal', () => {
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().catch(()=>{});
+            }
+            document.getElementById('scanResult').innerText = '';
+            document.getElementById('manualTicketCode').value = '';
+        });
+
+        // ====================== INITIALIZATION ======================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Login modal shown by data-bs-toggle, nothing else needed
+            // Auto‑load events for purchase dropdown if user already logged in? (unlikely on first load)
+            // Ensure logout button hidden initially
+            document.getElementById('logoutBtn').style.display = 'none';
+            // Role‑dependent sections hidden by default (inline style)
+        });
+
+        // Smooth scroll for nav links
+        document.querySelectorAll('.navbar-nav a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                    const navCollapse = document.getElementById('navbarNav');
+                    if (navCollapse.classList.contains('show')) {
+                        new bootstrap.Collapse(navCollapse).toggle();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
